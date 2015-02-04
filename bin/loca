@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'loca'
+
+cli = Loca::CLI.new
+cli.echo_url
