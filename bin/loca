@@ -2,5 +2,4 @@
 
 require 'loca/cli'
 
-cli = Loca::CLI.new
-cli.echo_url
+Loca::CLI.start(ARGV)

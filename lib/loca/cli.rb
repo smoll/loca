@@ -1,23 +1,32 @@
-require 'git'
+require 'loca/git'
+require 'thor'
 
 require 'byebug' # dev
 
 module Loca
-  class CLI
-    def initialize(url = 'https://github.com/theorchard/orchard/pull/2411')
-      @git = Git.open(Dir.pwd)
-      @url = url
+  class CLI < Thor
+    include Thor::Actions
 
-      ensure_git_repo
+    desc 'checkout', 'Check out a pull request locally'
+    def checkout(url)
+      branch = perform_checks(url)
+      say "Begin checkout of #{branch}!", :green # TODO: should call a Loca::Git inst method
     end
 
-    def echo_url
-      puts @url
-    end
+    private
 
-    def ensure_git_repo
-      puts 'remote URLs:'
-      @git.remotes.each { |r| puts "#{r.name}: #{r.url}" } # e.g. "upstream: https://github.com/theorchard/orchard.git"
+    def perform_checks(url)
+      git = Loca::Git.new(url)
+      git.perform_git_checks
+
+      branch_name = git.extract_branch_name
+
+      return branch_name unless git.already_checked_out? branch_name
+      if yes?("WARN: Branch '#{branch_name}' is already checked out. Overwrite? (n)", :yellow)
+        return branch_name
+      else
+        fail 'Git checkout aborted!'
+      end
     end
   end
 end
