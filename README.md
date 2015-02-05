@@ -14,11 +14,15 @@ Make it available on the command line by doing
 2. Navigate to the directory where you have that repo checked out
 3. Check out the PR by running
 
-	$ loca c https://github.com/theorchard/orchard/pull/2433
+ ```
+ $ loca c https://github.com/theorchard/orchard/pull/2433
+ ```
 
 4. When you are done testing, clean it up by pressing the up-arrow and appending a -d flag
 
-	$ loca c https://github.com/theorchard/orchard/pull/2433 -d
+ ```
+ $ loca c https://github.com/theorchard/orchard/pull/2433 -d
+ ```
 
 ## Contributing
 
