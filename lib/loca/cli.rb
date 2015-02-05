@@ -1,32 +1,37 @@
 require 'loca/git'
+require 'loca/url'
+require 'loca/exception'
 require 'thor'
-
-require 'byebug' # dev
 
 module Loca
   class CLI < Thor
     include Thor::Actions
 
-    desc 'checkout', 'Check out a pull request locally'
-    def checkout(url)
-      branch = perform_checks(url)
-      say "Begin checkout of #{branch}!", :green # TODO: should call a Loca::Git inst method
+    desc 'c URL', 'Check out a pull request locally'
+    method_option :delete, aliases: '-d', desc: 'Delete the branch instead of creating it'
+    def c(pasted_url)
+      return d(pasted_url) if options[:delete]
+
+      git = Loca::Git.new(pasted_url)
+      branch_name = git.branch_name
+
+      if git.first_time_creating? || yes?("WARN: Branch '#{branch_name}' "\
+        ' already exists. Overwrite? (n)', :yellow)
+        git.fetch
+        git.checkout
+        say "Checked out #{branch_name}!", :green
+      else
+        fail Loca::GitException, 'Git checkout aborted!'
+      end
     end
 
-    private
+    desc 'd URL', 'Delete the local branch for that URL'
+    def d(pasted_url)
+      git = Loca::Git.new(pasted_url)
+      branch_name = git.branch_name
 
-    def perform_checks(url)
-      git = Loca::Git.new(url)
-      git.perform_git_checks
-
-      branch_name = git.extract_branch_name
-
-      return branch_name unless git.already_checked_out? branch_name
-      if yes?("WARN: Branch '#{branch_name}' is already checked out. Overwrite? (n)", :yellow)
-        return branch_name
-      else
-        fail 'Git checkout aborted!'
-      end
+      git.delete
+      say "Deleted #{branch_name}!", :green
     end
   end
 end
