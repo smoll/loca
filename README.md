@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/smoll/loca.svg?branch=master)](https://travis-ci.org/smoll/loca)
 # Loca
 
 Command-line utility for checking out GitHub Pull Requests locally
