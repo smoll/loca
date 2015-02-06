@@ -9,3 +9,5 @@ RuboCop::RakeTask.new(:rubocop) do |task|
 end
 
 task dev: %w(rubocop install) # lint before installing the gem
+
+task default: 'rubocop'
