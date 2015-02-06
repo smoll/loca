@@ -1,6 +1,11 @@
 require 'bundler/gem_tasks'
+require 'rubocop/rake_task'
 
-task dev: ['build'] do
-  gem_file = Dir.glob('./pkg/loca-*.gem').sort.last
-  system "gem install #{gem_file}" # installs runtime dependencies too
+desc 'Run RuboCop'
+RuboCop::RakeTask.new(:rubocop) do |task|
+  task.patterns = ['**/*.rb', '**/Rakefile']
+  # abort rake on failure
+  task.fail_on_error = true
 end
+
+task dev: %w(rubocop install) # lint before installing the gem

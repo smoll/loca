@@ -39,7 +39,7 @@ module Loca
       fail Loca::GitException, "Something went wrong! Try running: #{cmd}"
     end
 
-    def first_time_creating?(name = @branch_name) # keep this a public method
+    def first_time_creating? # keep this a public method
       branches.include?(@branch_name) ? false : true
     end
 
