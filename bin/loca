@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'loca/cli'
+require 'loca'
 
 Loca::CLI.start(ARGV)

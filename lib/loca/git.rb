@@ -1,7 +1,3 @@
-require 'loca/url'
-require 'loca/exception'
-require 'git' # gem
-
 module Loca
   class Git
     attr_reader :branch_name

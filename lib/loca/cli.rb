@@ -1,11 +1,13 @@
-require 'loca/git'
-require 'loca/url'
-require 'loca/exception'
-require 'thor'
-
 module Loca
   class CLI < Thor
-    include Thor::Actions
+    include Thor::Actions # https://github.com/erikhuda/thor/wiki/Actions
+
+    map %w(--version -v) => :__print_version
+
+    desc '--version, -v', 'print the version'
+    def __print_version
+      puts Loca::VERSION
+    end
 
     desc 'c URL', 'Check out a pull request locally'
     method_option :delete, aliases: '-d', desc: 'Delete the branch instead of creating it'
