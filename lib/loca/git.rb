@@ -36,10 +36,10 @@ module Loca
       cmd = "git fetch #{@remote_name} pull/#{@url.pr_num}/head:#{@branch_name}"
       msg = system cmd # TODO: Use ::Git instead of system call
       return if msg
-      fail Loca::GitException, "Something went wrong! Try running: #{cmd}"
+      fail Loca::GitException, "Something went wrong! Try running: `#{cmd}'"
     end
 
-    def first_time_creating?(name = @branch_name) # keep this a public method
+    def first_time_creating? # keep this a public method
       branches.include?(@branch_name) ? false : true
     end
 
@@ -50,20 +50,20 @@ module Loca
     end
 
     def ensure_git_repo
-      ::Git.open(Dir.pwd)
-    rescue ArgumentError
-      raise Loca::GitException "Current directory is not a git repo! pwd: #{Dir.pwd}"
+      repo = system 'git rev-parse'
+      fail Loca::GitException, "Current directory is not a git repo! pwd: #{Dir.pwd}" unless repo
     end
 
     def extract_remote_name
       mapping = {}
       @git.remotes.each do |remote|
-        mapping[remote.name] = remote.url.sub(/.git$/, '') # strip off trailing '.git'
+        # So we get base URLs we can use as the basis for comparison
+        mapping[remote.name] = remote.url.sub(/.git$/, '')
       end
 
       match = mapping.select { |_name, url| @url.to_s.include? url }
       fail Loca::GitException, 'You must set the repo as a remote'\
-      "(see `git remote -v'). All remotes: #{mapping}" if match.empty?
+      " (see `git remote -v'). All remotes: #{mapping}" if match.empty?
       match.keys.first
     end
   end
