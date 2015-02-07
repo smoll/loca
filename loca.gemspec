@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'colorize', '~> 0.7.5'
 
   spec.add_development_dependency 'bundler', '~> 1.6'
-  spec.add_development_dependency 'rake', '~> 0'
+  spec.add_development_dependency 'rake', '~> 10.4', '>= 10.4.2'
   spec.add_development_dependency 'rubocop', '~> 0.29.0'
   spec.add_development_dependency 'rspec', '~> 3.2.0'
   spec.add_development_dependency 'coveralls', '~> 0.7.9'
