@@ -1,4 +1,7 @@
 # Using https://raw.githubusercontent.com/bbatsov/rubocop/master/spec/spec_helper.rb as a guide
+require 'coveralls'
+Coveralls.wear!
+
 require 'bundler/setup'
 Bundler.setup # From http://stackoverflow.com/a/4402193
 
