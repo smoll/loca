@@ -1,6 +1,12 @@
 # Using https://raw.githubusercontent.com/bbatsov/rubocop/master/spec/spec_helper.rb as a guide
+require 'simplecov'
 require 'coveralls'
-Coveralls.wear!
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start
 
 require 'bundler/setup'
 Bundler.setup # From http://stackoverflow.com/a/4402193
