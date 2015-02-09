@@ -1,10 +1,12 @@
 # Using https://raw.githubusercontent.com/bbatsov/rubocop/master/spec/spec_helper.rb as a guide
 require 'simplecov'
 require 'coveralls'
+require 'codeclimate-test-reporter'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::HTMLFormatter,
-  Coveralls::SimpleCov::Formatter
+  Coveralls::SimpleCov::Formatter,
+  CodeClimate::TestReporter::Formatter
 ]
 SimpleCov.start
 
