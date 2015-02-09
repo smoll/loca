@@ -8,7 +8,6 @@ module Loca
 
       ensure_git_repo
       ensure_no_unstashed_files
-      @git = ::Git.open(Dir.pwd)
       @remote_name = remote || extract_remote_name
     end
 
@@ -36,6 +35,20 @@ module Loca
       branches.include?(@branch_name) ? false : true
     end
 
+    # Example
+    #
+    # git_match_http?("https://github.com/smoll/loca.git", "https://github.com/smoll/loca/pull/1")
+    # => true
+    def git_match_http?(git, http)
+      format = lambda do |uri| # Strip off uri scheme & trailing '.git'
+        uri.sub('https://', '')
+        .sub('http://', '')
+        .sub('git://', '')
+        .sub(/.git$/, '')
+      end
+      format.call(http).start_with?(format.call(git))
+    end
+
     private
 
     def git(cmd, fail_on_stderr = true)
@@ -51,7 +64,7 @@ module Loca
     end
 
     def branches
-      @git.branches.map(&:name)
+      git("for-each-ref refs/heads/ --format='%(refname:short)'").split("\n")
     end
 
     def current_branch
@@ -73,16 +86,20 @@ module Loca
       git "checkout #{another}"
     end
 
-    def extract_remote_name
+    def remote_mapping
+      names = git('remote show -n').split("\n")
       mapping = {}
-      @git.remotes.each do |remote|
-        mapping[remote.name] = remote.url.sub('git://', '').sub(/.git$/, '') # Strip off uri scheme & trailing '.git'
+      names.each do |name|
+        mapping[name] = git("config --get remote.#{name}.url").strip
       end
+      mapping
+    end
 
-      match = mapping.select { |_name, url| @url.to_s.include? url }
+    def extract_remote_name
+      match = remote_mapping.find { |_name, url| git_match_http?(url, @url.to_s) }
       fail Loca::GitException, "You must set the repo (#{@url}) as a remote "\
-      "(see `git remote -v'). All remotes: #{mapping}" if match.empty?
-      match.keys.first
+      "(see `git remote -v'). All remotes: #{remote_mapping}" unless match
+      match.first
     end
   end
 end

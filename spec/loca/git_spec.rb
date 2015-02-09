@@ -2,6 +2,7 @@ describe Loca::Git do
   let(:pid) { 1 } # Pull request ID
   let(:url) { "https://github.com/smoll/loca/pull/#{pid}" }
   let(:remote_name) { 'loca-fake-remote' }
+  let(:remote_url) { 'https://github.com/smoll/loca.git' }
   subject { described_class.new(url, remote_name) }
 
   let(:expected_branch_name) { "PULL_#{pid}" }
@@ -16,6 +17,30 @@ describe Loca::Git do
     it 'prints to stderr when an invalid git command is supplied, but we do not want to fail on stderr' do
       output = capture(:stderr) { subject.send(:git, 'not-a-git-command', false) }
       expect(output).to include "git: 'not-a-git-command' is not a git command"
+    end
+  end
+
+  describe '#branches' do # private method
+    it 'returns all local branches' do
+      cmd = "for-each-ref refs/heads/ --format='%(refname:short)'"
+      expect(subject).to receive(:git).with(cmd).and_return 'a_branch'
+      expect(subject.send(:branches)).to eq ['a_branch']
+    end
+  end
+
+  describe '#remote_mapping' do # private method
+    it "returns all of the repo's remotes" do
+      expect(subject).to receive(:git).with('remote show -n').and_return remote_name
+      expect(subject).to receive(:git).with("config --get remote.#{remote_name}.url").and_return remote_url
+      expect(subject.send(:remote_mapping)).to eq(remote_name => remote_url)
+    end
+  end
+
+  describe '#extract_remote_name' do # private method
+    it 'returns the local repo remote name corresponding to the Pull Request URL' do
+      expect(subject).to receive(:remote_mapping).and_return(remote_name => remote_url) # investigate this
+
+      expect(subject.send(:extract_remote_name)).to eq remote_name
     end
   end
 
@@ -105,6 +130,23 @@ describe Loca::Git do
     it 'returns true when the branch does not exist' do
       allow(subject).to receive(:branches).and_return branches_without_expected
       expect(subject.first_time_creating?).to eq true
+    end
+  end
+
+  describe '#git_match_http?' do
+    it 'returns true when matching urls are supplied' do
+      git_url = 'https://github.com/smoll/loca.git'
+      expect(subject.git_match_http?(git_url, url))
+    end
+
+    it 'returns true when different URI schemes but matching urls are supplied' do
+      git_url = 'git://github.com/smoll/loca.git'
+      expect(subject.git_match_http?(git_url, url))
+    end
+
+    it 'returns false when non-matching urls are supplied' do
+      git_url = 'git://github.com/someoneelse/loca.git'
+      expect(subject.git_match_http?(git_url, url))
     end
   end
 end
