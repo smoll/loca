@@ -22,7 +22,7 @@ module Loca
     end
 
     def checkout
-      @git.branch(@branch_name).checkout
+      git "checkout #{@branch_name}"
     end
 
     def fetch
@@ -45,7 +45,7 @@ module Loca
       if fail_on_stderr
         fail Loca::GitException, "#{shellout.stderr}"
       else
-        puts shellout.stderr.red
+        $stderr.puts shellout.stderr.red
       end
       shellout.stdout
     end
@@ -68,20 +68,19 @@ module Loca
     end
 
     def checkout_another_branch
-      puts "branches: #{branches}".yellow
       another = branches.find { |branch| branch != current_branch }
-      puts "another: #{another}".yellow
-      @git.branch(another).checkout
+      fail Loca::GitException, 'No other branch to checkout!' unless another
+      git "checkout #{another}"
     end
 
     def extract_remote_name
       mapping = {}
       @git.remotes.each do |remote|
-        mapping[remote.name] = remote.url.sub(/.git$/, '') # Strip off trailing '.git'
+        mapping[remote.name] = remote.url.sub('git://', '').sub(/.git$/, '') # Strip off uri scheme & trailing '.git'
       end
 
       match = mapping.select { |_name, url| @url.to_s.include? url }
-      fail Loca::GitException, 'You must set the repo as a remote '\
+      fail Loca::GitException, "You must set the repo (#{@url}) as a remote "\
       "(see `git remote -v'). All remotes: #{mapping}" if match.empty?
       match.keys.first
     end

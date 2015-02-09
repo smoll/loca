@@ -8,11 +8,52 @@ describe Loca::Git do
   let(:branches_without_expected) { ['master'] }
   let(:branches_with_expected) { branches_without_expected << expected_branch_name }
 
-  before do
-    allow(subject).to receive(:git) # ensure we don't actually shell out to `git`
+  describe '#git' do # private method that shells out to git
+    it 'raises an error when an invalid git command is supplied' do
+      expect { capture(:stderr) { subject.send(:git, 'not-a-git-command') } }.to raise_error
+    end
+
+    it 'prints to stderr when an invalid git command is supplied, but we do not want to fail on stderr' do
+      output = capture(:stderr) { subject.send(:git, 'not-a-git-command', false) }
+      expect(output).to include "git: 'not-a-git-command' is not a git command"
+    end
+  end
+
+  describe '#current_branch' do # private method
+    it 'returns the current branch' do
+      expect(subject).to receive(:git).with('rev-parse --abbrev-ref HEAD').once
+      subject.send(:current_branch)
+    end
+  end
+
+  describe '#checkout' do # private method
+    it 'checks out the expected branch' do
+      expect(subject).to receive(:git).with("checkout #{expected_branch_name}").once
+      subject.send(:checkout)
+    end
+  end
+
+  describe '#checkout_another_branch' do # private method
+    it 'checks out a branch that is not the current one' do
+      allow(subject).to receive(:branches).and_return %w(branch1 branch2)
+      allow(subject).to receive(:current_branch).and_return 'branch1'
+      expect(subject).to receive(:git).with('checkout branch2').once
+      silence(:stdout) { subject.send(:checkout_another_branch) }
+    end
+
+    it 'raises an error when there is no other branch to check out' do
+      allow(subject).to receive(:branches).and_return ['branch1']
+      allow(subject).to receive(:current_branch).and_return 'branch1'
+
+      expect { silence(:stderr) { subject.send(:checkout_another_branch) } }.to raise_error
+    end
   end
 
   describe '#fetch' do
+    before do
+      allow(subject).to receive(:git) # ensure we don't actually shell out to `git`
+    end
+
     it 'deletes before fetching when the branch already exists' do
       allow(subject).to receive(:branches).and_return branches_with_expected
       expect(subject).to receive(:delete).once
@@ -23,7 +64,7 @@ describe Loca::Git do
     it 'fetches the remote pull request' do
       allow(subject).to receive(:branches).and_return branches_without_expected
 
-      # Investigate why we need to ignore stderr here, i.e. pass false as the 2nd arg:
+      # Investigate why this git command prints to $stderr, i.e. we must pass false as the 2nd arg:
       expect(subject).to receive(:git).with("fetch #{remote_name} pull/#{pid}/head:#{expected_branch_name}", false)
 
       subject.fetch
