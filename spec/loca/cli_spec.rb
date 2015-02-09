@@ -20,8 +20,7 @@ describe Loca::CLI do
     it 'fetches and overwrites existing branch if the user says yes to overwrite' do
       expect_any_instance_of(Loca::Git).to receive(:branch_name).and_return 'PULL_1'
       expect_any_instance_of(Loca::Git).to receive(:first_time_creating?).and_return false
-
-      allow_any_instance_of(described_class).to receive(:yes?).and_return true # TODO: silence this [WARNING] puts
+      silence(:stdout) { allow_any_instance_of(described_class).to receive(:yes?).and_return true }
 
       output = capture(:stdout) { Loca::CLI.start(%W(c #{url})) }.strip
       expect(output).to end_with 'Checked out PULL_1!'
@@ -30,7 +29,7 @@ describe Loca::CLI do
     it 'raises an error when the branch exists and the user says no to overwrite' do
       expect_any_instance_of(Loca::Git).to receive(:branch_name).and_return 'PULL_1'
       expect_any_instance_of(Loca::Git).to receive(:first_time_creating?).and_return false
-      allow_any_instance_of(described_class).to receive(:yes?).and_return false # TODO: silence this [WARNING] puts
+      silence(:stdout) { allow_any_instance_of(described_class).to receive(:yes?).and_return false }
 
       expect { silence(:stderr) { Loca::CLI.start(%W(c #{url})) } }.to raise_error
     end
