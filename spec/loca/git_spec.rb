@@ -136,17 +136,17 @@ describe Loca::Git do
   describe '#git_match_http?' do
     it 'returns true when matching urls are supplied' do
       git_url = 'https://github.com/smoll/loca.git'
-      expect(subject.git_match_http?(git_url, url))
+      expect(subject.git_match_http?(git_url, url)).to eq true
     end
 
     it 'returns true when different URI schemes but matching urls are supplied' do
       git_url = 'git://github.com/smoll/loca.git'
-      expect(subject.git_match_http?(git_url, url))
+      expect(subject.git_match_http?(git_url, url)).to eq true
     end
 
     it 'returns false when non-matching urls are supplied' do
       git_url = 'git://github.com/someoneelse/loca.git'
-      expect(subject.git_match_http?(git_url, url))
+      expect(subject.git_match_http?(git_url, url)).to eq false
     end
   end
 end
