@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/smoll/loca.svg?branch=master)](https://travis-ci.org/smoll/loca) [![Coverage Status](https://coveralls.io/repos/smoll/loca/badge.svg?branch=coveralls)](https://coveralls.io/r/smoll/loca?branch=coveralls)
-# Loca
+# Loca [![Build Status](https://travis-ci.org/smoll/loca.svg?branch=master)](https://travis-ci.org/smoll/loca) [![Coverage Status](https://coveralls.io/repos/smoll/loca/badge.svg?branch=master)](https://coveralls.io/r/smoll/loca?branch=master)
 
 Command-line utility for checking out GitHub Pull Requests locally
 
