@@ -17,7 +17,6 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'git', '~> 1.2', '>= 1.2.9.1'
   spec.add_runtime_dependency 'thor', '~> 0.19.1'
   spec.add_runtime_dependency 'colorize', '~> 0.7.5'
   spec.add_runtime_dependency 'mixlib-shellout', '~> 2.0.1'

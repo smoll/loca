@@ -1,7 +1,6 @@
 # Require all runtime dependencies first
 require 'thor'
 require 'colorize'
-require 'git'
 require 'mixlib/shellout'
 
 # Start by requiring files with no dependencies on other files, then files with
