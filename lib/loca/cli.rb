@@ -35,5 +35,13 @@ module Loca
       git.delete
       say "Deleted #{branch_name}!", :green
     end
+
+    private # rubocop:disable Lint/UselessAccessModifier
+
+    no_commands do # Thor primitive(s) that we want to stub in RSpec
+      def yes?(*args)
+        super
+      end
+    end
   end
 end

@@ -26,6 +26,8 @@ RSpec.configure do |config|
 
   config.mock_with :rspec do |mocks|
     mocks.syntax = :expect # Disable `should_receive` and `stub`
+    mocks.verify_partial_doubles = true # Avoid La La Land,
+    # read http://wegowise.github.io/blog/2014/09/03/rspec-verifying-doubles/
   end
 
   config.before do
