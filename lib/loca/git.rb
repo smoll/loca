@@ -21,7 +21,7 @@ module Loca
     end
 
     def checkout
-      git "checkout #{@branch_name}"
+      git "checkout #{@branch_name}", false # prints to stderr for some reason
     end
 
     def fetch
@@ -68,7 +68,7 @@ module Loca
     end
 
     def current_branch
-      git 'rev-parse --abbrev-ref HEAD'
+      git('rev-parse --abbrev-ref HEAD').strip
     end
 
     def ensure_git_repo
@@ -83,7 +83,7 @@ module Loca
     def checkout_another_branch
       another = branches.find { |branch| branch != current_branch }
       fail Loca::GitException, 'No other branch to checkout!' unless another
-      git "checkout #{another}"
+      git "checkout #{another}", false # prints to stderr for some reason
     end
 
     def remote_mapping

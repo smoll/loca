@@ -46,14 +46,14 @@ describe Loca::Git do
 
   describe '#current_branch' do # private method
     it 'returns the current branch' do
-      expect(subject).to receive(:git).with('rev-parse --abbrev-ref HEAD').once
-      subject.send(:current_branch)
+      expect(subject).to receive(:git).with('rev-parse --abbrev-ref HEAD').and_return "branch_name\n"
+      expect(subject.send(:current_branch)).to eq 'branch_name'
     end
   end
 
   describe '#checkout' do # private method
     it 'checks out the expected branch' do
-      expect(subject).to receive(:git).with("checkout #{expected_branch_name}").once
+      expect(subject).to receive(:git).with("checkout #{expected_branch_name}", false).once
       subject.send(:checkout)
     end
   end
@@ -62,7 +62,7 @@ describe Loca::Git do
     it 'checks out a branch that is not the current one' do
       allow(subject).to receive(:branches).and_return %w(branch1 branch2)
       allow(subject).to receive(:current_branch).and_return 'branch1'
-      expect(subject).to receive(:git).with('checkout branch2').once
+      expect(subject).to receive(:git).with('checkout branch2', false).once
       silence(:stdout) { subject.send(:checkout_another_branch) }
     end
 
