@@ -12,9 +12,6 @@ module Loca
     end
 
     def delete
-      unless branches.include? @branch_name
-        fail Loca::GitException, "Not a branch: #{@branch_name}"
-      end
       # Cannot delete a branch you are currently on:
       checkout_another_branch if @branch_name == current_branch
       git "branch -D #{@branch_name}"
@@ -56,11 +53,11 @@ module Loca
       shellout.run_command
       return shellout.stdout if shellout.stderr.empty?
       if fail_on_stderr
-        fail Loca::GitException, "#{shellout.stderr}"
+        fail Loca::Error::GitStdErrDetected, "#{shellout.stderr.strip}"
       else
-        $stderr.puts shellout.stderr.red
+        $stderr.puts shellout.stderr.strip.yellow
       end
-      shellout.stdout
+      shellout.stdout.strip
     end
 
     def branches
@@ -77,12 +74,12 @@ module Loca
 
     def ensure_no_unstashed_files
       val = git 'status --porcelain'
-      fail Loca::GitException, 'Commit or stash your files before continuing!' unless val.empty?
+      fail Loca::Error::UnstashedFilesFound, 'Commit or stash your files before continuing!' unless val.empty?
     end
 
     def checkout_another_branch
       another = branches.find { |branch| branch != current_branch }
-      fail Loca::GitException, 'No other branch to checkout!' unless another
+      fail Loca::Error::OnlyOneBranch, 'No other branch to checkout!' unless another
       git "checkout #{another}", false # prints to stderr for some reason
     end
 
@@ -97,7 +94,7 @@ module Loca
 
     def extract_remote_name
       match = remote_mapping.find { |_name, url| git_match_http?(url, @url.to_s) }
-      fail Loca::GitException, "You must set the repo (#{@url}) as a remote "\
+      fail Loca::Error::RemoteNotSet, "You must set the repo (#{@url}) as a remote "\
       "(see `git remote -v'). All remotes: #{remote_mapping}" unless match
       match.first
     end
