@@ -23,7 +23,7 @@ module Loca
         git.checkout
         say "Checked out #{branch_name}!", :green
       else
-        fail Loca::GitException, 'Git checkout aborted!'
+        fail Loca::Error::GitAborted, 'Git checkout aborted!'
       end
     end
 

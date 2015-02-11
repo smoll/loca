@@ -7,7 +7,7 @@ require 'mixlib/shellout'
 # only external gem runtime dependencies (specified above), then files with
 # dependencies on other files within the loca project itself
 require 'loca/version'
-require 'loca/exception'
+require 'loca/error'
 require 'loca/url'
 require 'loca/git'
 require 'loca/cli'

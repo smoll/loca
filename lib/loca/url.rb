@@ -1,5 +1,3 @@
-require 'loca/exception'
-
 module Loca
   class URL
     attr_reader :branch_name
@@ -23,7 +21,7 @@ module Loca
       int = Integer(segments[-1]) rescue false # replace with coercible gem?
       pull = segments[-2] == 'pull'
 
-      fail Loca::URLException, "Doesn't appear to be a well-formed URL: #{@url}" unless int && pull
+      fail Loca::Error::InvalidURL, "Doesn't appear to be a well-formed URL: #{@url}" unless int && pull
     end
 
     private
