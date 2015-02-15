@@ -15,6 +15,16 @@ end
 desc 'Run RSpec'
 RSpec::Core::RakeTask.new(:spec)
 
+desc 'Run only unit tests'
+RSpec::Core::RakeTask.new(:unit) do |task|
+  task.exclude_pattern = 'spec/e2e/**/*_spec.rb'
+end
+
+desc 'Run only e2e tests'
+RSpec::Core::RakeTask.new(:e2e) do |task|
+  task.pattern = 'spec/e2e/**/*_spec.rb'
+end
+
 task dev: %w(test install) # lint+test before installing the gem
 
 task test: %w(rubocop spec)
