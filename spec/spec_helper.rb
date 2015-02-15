@@ -20,6 +20,8 @@ require 'loca'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
+  config.include Features::GitHubHelper
+
   config.order = :random
 
   config.expect_with :rspec do |expectations|
