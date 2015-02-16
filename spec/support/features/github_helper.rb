@@ -25,11 +25,18 @@ module Features
       shellout! 'git remote add upstream https://github.com/octocat/Spoon-Knife.git'
     end
 
-    def shellout!(cmd)
-      sh = Mixlib::ShellOut.new cmd.to_s
+    def current_branch
+      shellout! 'git rev-parse --abbrev-ref HEAD'
+    end
+
+    def shellout!(cmd, opts = {})
+      opts = {
+        input: nil
+      }.merge(opts)
+      sh = opts[:input].nil? ? Mixlib::ShellOut.new(cmd.to_s) : Mixlib::ShellOut.new(cmd.to_s, input: opts[:input].to_s)
       sh.run_command
 
-      sh.error!
+      sh.error! if opts[:input].nil? # NOTE: CLI exits non-zero if waiting on user input
       sh.stdout
     end
 
