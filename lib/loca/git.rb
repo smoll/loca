@@ -1,5 +1,7 @@
 module Loca
   class Git
+    include Thor::Actions
+
     attr_reader :branch_name
 
     def initialize(url, remote = nil)
@@ -94,9 +96,22 @@ module Loca
 
     def extract_remote_name
       match = remote_mapping.find { |_name, url| git_match_http?(url, @url.to_s) }
-      fail Loca::Error::RemoteNotSet, "You must set the repo (#{@url}) as a remote "\
-      "(see `git remote -v'). All remotes: #{remote_mapping}" unless match
+      unless match
+        if yes?("Remote #{(@url)} not set. Would you like to set it as 'auto_loca_remote'?")
+          set_remote
+        else
+          fail Loca::Error::RemoteNotSet, "You must set the repo (#{@url}) as a remote "\
+          "(see `git remote -v'). All remotes: #{remote_mapping}"
+        end
+      end
       match.first
+    end
+
+    def set_remote
+      uri = Addressable::URI.parse(@url)
+      uri.path = uri.path.split('/')[0..2].join('/')
+      remote_url = "#{uri}.git"
+      git "remote add upstream #{remote_url}"
     end
   end
 end
