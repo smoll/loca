@@ -2,6 +2,7 @@
 require 'thor'
 require 'colorize'
 require 'mixlib/shellout'
+require 'addressable/uri'
 
 # Start by requiring files with no dependencies on other files, then files with
 # only external gem runtime dependencies (specified above), then files with
