@@ -1,47 +1,73 @@
+require "optparse"
+
 module Loca
-  class CLI < Thor
-    include Thor::Actions # https://github.com/erikhuda/thor/wiki/Actions
-
-    map %w(--version -v) => :__print_version
-
-    desc '--version, -v', 'print the version'
-    def __print_version
-      puts Loca::VERSION
+  class CLI
+    def initialize(argv, stdin = STDIN, stdout = STDOUT, stderr = STDERR, kernel = Kernel)
+      @argv, @stdin, @stdout, @stderr, @kernel = argv, stdin, stdout, stderr, kernel
     end
 
-    desc 'c URL', 'Check out a pull request locally'
-    method_option :delete, aliases: '-d', desc: 'Delete the branch instead of creating it'
-    def c(pasted_url)
-      return d(pasted_url) if options[:delete]
+    def execute!
+      begin
+        parse_opts
+        parse_cmd
+      rescue Loca::Error::Standard, OptionParser::InvalidOption => e # colorize if so
+        @stderr.puts e.message.red
+        @stderr.puts e.backtrace if @options[:backtrace]
+        @stdout.puts parser # add if-user-error validation here
+        @kernel.exit(1)
+      end
+      @kernel.exit(0)
+    end
 
-      git = Loca::Git.new(pasted_url)
-      branch_name = git.branch_name
+    private
 
-      if git.first_time_creating? || yes?("WARN: Branch '#{branch_name}' "\
-        ' already exists. Overwrite? (n)', :yellow)
-        git.fetch
-        git.checkout
-        say "Checked out #{branch_name}!", :green
-      else
-        fail Loca::Error::GitAborted, 'Git checkout aborted!'
+    def parse_opts
+      parser.parse! @argv
+    end
+
+    def parse_cmd
+      fail Loca::Error::InvalidURL, "Need to pass in a single URL! Args: #{@argv}" unless @argv.count == 1
+      @parsed_url = Loca::URL::Parser.new(@argv[0]).parse
+
+      return delete if @options[:delete]
+      create
+    end
+
+    def parser # rubocop:disable Metrics/MethodLength
+      return @parser if @parser
+      @options = { delete: false, backtrace: false }
+      @parser = OptionParser.new do |opts|
+        opts.banner = "Usage: loca <url> [options]"
+        opts.on("-b", "--backtrace", "Display full stacktraces on error") do
+          @options[:backtrace] = true
+        end
+        opts.on("-d", "--delete", "Deletes the checked out branch") do
+          @options[:delete] = true
+        end
+        opts.on_tail("-h", "--help", "Displays Help") do
+          @stdout.puts opts
+          @kernel.exit(0)
+        end
+        opts.on_tail("-v", "--version", "Display Version") do
+          @stdout.puts Loca::VERSION
+          @kernel.exit(0)
+        end
       end
     end
 
-    desc 'd URL', 'Delete the local branch for that URL'
-    def d(pasted_url)
-      git = Loca::Git.new(pasted_url)
-      branch_name = git.branch_name
-
-      git.delete
-      say "Deleted #{branch_name}!", :green
+    def delete
+      Loca::Git::BranchDeleter.new(@parsed_url[:branch_name]).delete
+      @stdout.puts "Deleted branch #{@parsed_url[:branch_name]}".green
     end
 
-    private # rubocop:disable Lint/UselessAccessModifier
-
-    no_commands do # Thor primitive(s) that we want to stub in RSpec
-      def yes?(*args)
-        super
-      end
+    def create
+      Loca::Git::BranchCreator.new(
+        @parsed_url[:pull][:num],
+        @parsed_url[:branch_name],
+        @parsed_url[:remote][:name],
+        @parsed_url[:remote][:url]
+      ).create
+      @stdout.puts "Created and checked out branch #{@parsed_url[:branch_name]}".green
     end
   end
 end

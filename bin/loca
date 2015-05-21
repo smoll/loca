@@ -1,5 +1,3 @@
 #!/usr/bin/env ruby
-
-require 'loca'
-
-Loca::CLI.start(ARGV)
+require "loca"
+Loca::CLI.new(ARGV.dup).execute!
