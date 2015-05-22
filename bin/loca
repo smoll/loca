@@ -1,5 +1,34 @@
 #!/usr/bin/env ruby
 
-require 'loca'
+# Based on https://github.com/colszowka/simplecov/issues/234
+# and http://stackoverflow.com/a/20505441/3456726
+if ENV["COVERAGE"]
+  require "simplecov"
 
-Loca::CLI.start(ARGV)
+  # As described in the issue, every process must have an unique name:
+  SimpleCov.command_name "loca #{ARGV.join(' ')} (Aruba)"
+
+  # When running with aruba simplecov was using /tmp/aruba as the root folder.
+  # This is to force using the project folder
+  SimpleCov.root(File.join(File.expand_path(File.dirname(__FILE__)), ".."))
+
+  SimpleCov.start do
+    filters.clear
+
+    # Because simplecov filters everything outside of the SimpleCov.root
+    # This should be added, cf.
+    # https://github.com/colszowka/simplecov#default-root-filter-and-coverage-for-things-outside-of-it
+    add_filter do |src|
+      !(src.filename =~ /^#{SimpleCov.root}/) unless src.filename =~ /loca/
+    end
+
+    # Ignoring test folders and tmp for Aruba
+    add_filter "/spec/"
+    add_filter "/test/"
+    add_filter "/features/"
+    add_filter "/tmp/"
+  end
+end
+
+require "loca"
+Loca::CLI.new(ARGV.dup).execute!

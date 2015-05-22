@@ -2,20 +2,13 @@
 # and http://www.simonewebdesign.it/how-to-set-default-message-exception/
 module Loca
   module Error
-    class Base < StandardError
-      def initialize(message)
-        # To get the message in red
-        $stderr.puts message.red
-        @message = message
-      end
-    end
+    class Standard < StandardError; end
 
-    InvalidURL = Class.new(Base)
-
-    GitStdErrDetected = Class.new(Base)
-    UnstashedFilesFound = Class.new(Base)
-    OnlyOneBranch = Class.new(Base)
-    RemoteNotSet = Class.new(Base)
-    GitAborted = Class.new(Base)
+    InvalidURL = Class.new(Standard)
+    GitStdErrDetected = Class.new(Standard)
+    UnstashedFilesFound = Class.new(Standard)
+    OnlyOneBranch = Class.new(Standard)
+    RemoteNotSet = Class.new(Standard)
+    GitAborted = Class.new(Standard)
   end
 end

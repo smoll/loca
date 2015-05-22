@@ -1,32 +1,33 @@
-require 'bundler/gem_tasks'
-require 'rubocop/rake_task'
-require 'rspec/core/rake_task'
+require "bundler/gem_tasks"
+require "rubocop/rake_task"
+require "rspec/core/rake_task"
+require "cucumber/rake/task"
+require "coveralls/rake/task"
 
-desc 'Run RuboCop'
 RuboCop::RakeTask.new(:rubocop) do |task|
-  task.patterns = ['**/*.rb', '**/Rakefile']
-  task.options = [
-    '--display-cop-names'
-  ]
   # abort rake on failure
   task.fail_on_error = true
 end
 
-desc 'Run RSpec'
 RSpec::Core::RakeTask.new(:spec)
 
-desc 'Run only unit tests'
-RSpec::Core::RakeTask.new(:unit) do |task|
-  task.exclude_pattern = 'spec/e2e/**/*_spec.rb'
+Cucumber::Rake::Task.new(:features) do |task|
+  task.cucumber_opts = ""
+  task.cucumber_opts << "--format pretty"
 end
 
-desc 'Run only e2e tests'
-RSpec::Core::RakeTask.new(:e2e) do |task|
-  task.pattern = 'spec/e2e/**/*_spec.rb'
+Coveralls::RakeTask.new # task "coveralls:push"
+
+namespace :code_climate do
+  task :push do
+    require "simplecov"
+    require "codeclimate-test-reporter"
+    CodeClimate::TestReporter::Formatter.new.format(SimpleCov.result)
+  end
 end
 
-task dev: %w(test install) # lint+test before installing the gem
+task pre_commit: ["rubocop:auto_correct", "spec"]
 
-task test: %w(rubocop spec)
+task test: [:rubocop, :spec, :features, "code_climate:push", "coveralls:push"]
 
-task default: 'test'
+task default: :pre_commit
