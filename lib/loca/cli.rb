@@ -56,18 +56,18 @@ module Loca
     end
 
     def delete
-      Loca::Git::BranchDeleter.new(@parsed_url[:branch_name]).delete
-      @stdout.puts "Deleted branch #{@parsed_url[:branch_name]}".green
+      Loca::Git::BranchDeleter.new(@parsed_url.branch_name).delete
+      @stdout.puts "Deleted branch #{@parsed_url.branch_name}".green
     end
 
     def create
       Loca::Git::BranchCreator.new(
-        @parsed_url[:pull][:num],
-        @parsed_url[:branch_name],
-        @parsed_url[:remote][:name],
-        @parsed_url[:remote][:url]
+        @parsed_url.pull_num,
+        @parsed_url.branch_name,
+        @parsed_url.remote_name,
+        @parsed_url.remote_url
       ).create
-      @stdout.puts "Created and checked out branch #{@parsed_url[:branch_name]}".green
+      @stdout.puts "Created and checked out branch #{@parsed_url.branch_name}".green
     end
   end
 end

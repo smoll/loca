@@ -1,6 +1,8 @@
 module Loca
   module URL
     class Parser
+      attr_reader :pull_num, :pull_url, :remote_url, :remote_name, :branch_name
+
       def initialize(url)
         @url = url
         @uri = Addressable::URI.parse(@url)
@@ -15,21 +17,7 @@ module Loca
         validate
         parse_attrs
         set_other_attrs
-        all_attrs
-      end
-
-      def all_attrs
-        {
-          branch_name: @branch_name,
-          pull: {
-            num: @pull_num,
-            url: @pull_url
-          },
-          remote: {
-            name: @remote_name,
-            url: @remote_url
-          }
-        }
+        self
       end
 
       private
@@ -53,7 +41,7 @@ module Loca
       end
 
       def set_other_attrs
-        @remote_name = "loca_r_#{@username}" # i.e. loca_r_USERNAME
+        @remote_name = "loca_r_#{@username}"
         @branch_name = "PULL_#{@pull_num}"
       end
     end

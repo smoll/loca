@@ -1,87 +1,79 @@
 describe Loca::URL::Parser do
   subject { described_class.new(url) }
+  let(:url) { "https://github.com/smoll/loca/pull/1337/" }
 
   describe "#to_s" do
-    let(:url) { "https://github.com/smoll/loca/pull/1337/" }
     it "returns the URL passed to the constructor" do
       expect(subject.to_s).to eq url
     end
   end
 
   describe "#parse" do
-    let(:parsed) { subject.parse }
+    subject { described_class.new(url) }
 
-    context "valid commits url" do
-      let(:url) { "https://github.com/smoll/loca/pull/1337/commits" }
+    it "returns the instantiated class" do
+      expect(subject.parse).to be_a Loca::URL::Parser
+    end
 
-      it "returns a hash" do
-        expect(parsed).to be_a Hash
+    context "valid" do
+      before(:each) { subject.parse }
+
+      context "commits url" do
+        let(:url) { "https://github.com/smoll/loca/pull/1337/commits" }
+
+        its(:pull_num) { is_expected.to eq "1337" }
+        its(:pull_url) { is_expected.to eq "https://github.com/smoll/loca/pull/1337" }
+        its(:remote_url) { is_expected.to eq "https://github.com/smoll/loca.git" }
+        its(:remote_name) { is_expected.to eq "loca_r_smoll" }
+        its(:branch_name) { is_expected.to eq "PULL_1337" }
       end
 
-      it "returns the correct pull num" do
-        expect(parsed[:pull][:num].to_s).to eq "1337"
+      context "files url" do
+        let(:url) { "https://github.com/smoll/loca/pull/1337/files" }
+
+        its(:pull_num) { is_expected.to eq "1337" }
+        its(:pull_url) { is_expected.to eq "https://github.com/smoll/loca/pull/1337" }
+        its(:remote_url) { is_expected.to eq "https://github.com/smoll/loca.git" }
+        its(:remote_name) { is_expected.to eq "loca_r_smoll" }
+        its(:branch_name) { is_expected.to eq "PULL_1337" }
       end
 
-      it "returns the correct pull url" do
-        expect(parsed[:pull][:url]).to eq "https://github.com/smoll/loca/pull/1337"
+      context "pull url" do
+        let(:url) { "https://github.com/smoll/loca/pull/1337" }
+
+        its(:pull_num) { is_expected.to eq "1337" }
+        its(:pull_url) { is_expected.to eq "https://github.com/smoll/loca/pull/1337" }
+        its(:remote_url) { is_expected.to eq "https://github.com/smoll/loca.git" }
+        its(:remote_name) { is_expected.to eq "loca_r_smoll" }
+        its(:branch_name) { is_expected.to eq "PULL_1337" }
       end
 
-      it "returns the correct remote url" do
-        expect(parsed[:remote][:url]).to eq "https://github.com/smoll/loca.git"
-      end
+      context "pull url with trailing slash" do
+        let(:url) { "https://github.com/smoll/loca/pull/1337/" }
 
-      it "returns the expected branch name" do
-        expect(parsed[:branch_name]).to eq "PULL_1337"
+        its(:pull_num) { is_expected.to eq "1337" }
+        its(:pull_url) { is_expected.to eq "https://github.com/smoll/loca/pull/1337" }
+        its(:remote_url) { is_expected.to eq "https://github.com/smoll/loca.git" }
+        its(:remote_name) { is_expected.to eq "loca_r_smoll" }
+        its(:branch_name) { is_expected.to eq "PULL_1337" }
       end
     end
 
-    context "valid files url" do
-      let(:url) { "https://github.com/smoll/loca/pull/1337/files" }
+    context "invalid" do
+      context "host" do
+        let(:url) { "https://badhub.com/smoll/loca/pull/1337" }
 
-      it "returns the correct remote url" do
-        expect(parsed[:remote][:url]).to eq "https://github.com/smoll/loca.git"
+        it "raises an error" do
+          expect { subject.parse }.to raise_error
+        end
       end
 
-      it "returns the expected branch name" do
-        expect(parsed[:branch_name]).to eq "PULL_1337"
-      end
-    end
+      context "url" do
+        let(:url) { "badhub.com" }
 
-    context "valid pull url" do
-      let(:url) { "https://github.com/smoll/loca/pull/1337" }
-
-      it "returns the correct remote url" do
-        expect(parsed[:remote][:url]).to eq "https://github.com/smoll/loca.git"
-      end
-
-      it "returns the expected branch name" do
-        expect(parsed[:branch_name]).to eq "PULL_1337"
-      end
-    end
-
-    context "valid pull url with trailing slash" do
-      let(:url) { "https://github.com/smoll/loca/pull/1337/" }
-
-      it "returns the correct remote url" do
-        expect(parsed[:remote][:url]).to eq "https://github.com/smoll/loca.git"
-      end
-
-      it "returns the expected branch name" do
-        expect(parsed[:branch_name]).to eq "PULL_1337"
-      end
-    end
-
-    context "invalid host" do
-      let(:url) { "https://badhub.com/smoll/loca/pull/1337" }
-      it "raises an error" do
-        expect { parsed }.to raise_error
-      end
-    end
-
-    context "invalid url" do
-      let(:url) { "badhub.com" }
-      it "raises an error" do
-        expect { parsed }.to raise_error
+        it "raises an error" do
+          expect { subject.parse }.to raise_error
+        end
       end
     end
   end

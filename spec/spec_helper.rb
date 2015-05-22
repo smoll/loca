@@ -13,6 +13,7 @@ SimpleCov.start CodeClimate::TestReporter.configuration.profile
 require "bundler/setup"
 Bundler.setup # From http://stackoverflow.com/a/4402193
 
+require "rspec/its"
 require "loca"
 
 # Requires supporting files with custom matchers and macros, etc,
