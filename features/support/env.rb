@@ -1,7 +1,7 @@
 require "simplecov"
 require "aruba/cucumber"
 
-SimpleCov.command_name "Cucumber"
+SimpleCov.command_name "features"
 
 Before do
   run_simple "rake install" # install gem
