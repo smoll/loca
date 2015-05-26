@@ -5,7 +5,10 @@ module Loca
       include Utils
 
       def initialize(pull_num, branch_name, remote_name, remote_url)
-        @pull_num, @branch_name, @remote_name, @remote_url = pull_num, branch_name, remote_name, remote_url
+        @pull_num = pull_num
+        @branch_name = branch_name
+        @remote_name = remote_name
+        @remote_url = remote_url
       end
 
       def create
