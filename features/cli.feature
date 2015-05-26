@@ -23,3 +23,7 @@ Feature: Loca CLI
     When I run `loca https://github.com/notausername/notevenarepo/pull/1 -b`
     Then the exit status should not be 0
     And the stderr should contain "loca/lib/loca/cli.rb:"
+
+  Scenario: Merge a PR (should fail with a permission denied when pushing to master)
+    When I run `loca https://github.com/octocat/Spoon-Knife/pull/4865 -m`
+    Then the stderr should contain "remote: Permission to octocat/Spoon-Knife.git denied to"
