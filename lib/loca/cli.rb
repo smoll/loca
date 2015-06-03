@@ -34,29 +34,44 @@ module Loca
       @parsed_url = Loca::URL::Parser.new(@argv[0]).parse
 
       return delete if @options[:delete]
+      return merge if @options[:merge]
       create
     end
 
     def parser # rubocop:disable Metrics/MethodLength
       return @parser if @parser
-      @options = { delete: false, backtrace: false }
+      @options = { merge: false, delete: false, backtrace: false }
       @parser = OptionParser.new do |opts|
         opts.banner = "Usage: loca <url> [options]"
         opts.on("-b", "--backtrace", "Display full stacktraces on error") do
           @options[:backtrace] = true
         end
+        opts.on("-m", "--merge", "Merges the PR (without a merge bubble!)") do
+          @options[:merge] = true
+        end
         opts.on("-d", "--delete", "Deletes the checked out branch") do
           @options[:delete] = true
         end
-        opts.on_tail("-h", "--help", "Displays Help") do
+        opts.on_tail("-h", "--help", "Displays help") do
           @stdout.puts opts
           @kernel.exit(0)
         end
-        opts.on_tail("-v", "--version", "Display Version") do
+        opts.on_tail("-v", "--version", "Display version") do
           @stdout.puts Loca::VERSION
           @kernel.exit(0)
         end
       end
+    end
+
+    def merge
+      creator = Loca::Git::BranchCreator.new(
+        @parsed_url.pull_num,
+        @parsed_url.branch_name,
+        @parsed_url.remote_name,
+        @parsed_url.remote_url
+      )
+      creator.create
+
     end
 
     def delete
@@ -65,12 +80,14 @@ module Loca
     end
 
     def create
-      Loca::Git::BranchCreator.new(
+      creator = Loca::Git::BranchCreator.new(
         @parsed_url.pull_num,
         @parsed_url.branch_name,
         @parsed_url.remote_name,
         @parsed_url.remote_url
-      ).create
+      )
+      creator.create
+      creator.checkout
       @stdout.puts "Created and checked out branch #{@parsed_url.branch_name}".green
     end
   end

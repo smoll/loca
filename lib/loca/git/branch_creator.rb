@@ -17,19 +17,23 @@ module Loca
         # To avoid fatal error: Refusing to fetch into current branch
         delete unless first_time_creating?
         fetch
-        checkout
-      end
-
-      def fetch
-        # Performs `git fetch upstream pull/PR_NUMBER/head:BRANCH_NAME`
-        git "fetch #{@remote_name} pull/#{@pull_num}/head:#{@branch_name}" # shellout has stderr for some reason
       end
 
       def checkout
         git "checkout #{@branch_name}" # prints to stderr for some reason
       end
 
+      def merge
+        git "checkout master"
+        git "merge #{@branch_name}"
+      end
+
       private
+
+      def fetch
+        # Performs `git fetch upstream pull/PR_NUMBER/head:BRANCH_NAME`
+        git "fetch #{@remote_name} pull/#{@pull_num}/head:#{@branch_name}" # shellout has stderr for some reason
+      end
 
       def delete
         BranchDeleter.new(@branch_name).delete
